@@ -10,17 +10,14 @@ class ZoneType(str, Enum):
 
 class Zone():
     name: str
-    x: int
-    y: int
+    coords: tuple[int, int]
     zone_type: ZoneType
     max_drones: int
     color: str | None
     current_occupancy: int
 
-    def __init__(self, name: str, x: int, y: int):
+    def __init__(self, name: str, coords: tuple[int, int]):
         self.name = name
-        self.x = x
-        self.y = y
         self.zone_type = ZoneType.NORMAL
         self.max_drones = 1
         self.color = None
