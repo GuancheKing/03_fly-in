@@ -3,6 +3,7 @@ from src.core.connection import Connection
 
 
 class Graph():
+    nb_drones: int
     zones: dict[str, Zone]
     connections: list[Connection]
     adjacency: dict[str, list[str]]
