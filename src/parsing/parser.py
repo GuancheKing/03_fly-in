@@ -106,17 +106,17 @@ class MapParser():
                             )
                         graph.end_zone = zone
 
-                    if graph.start_zone is None:
-                        raise MapError(
-                            "Missing start zone in map",
-                            f"{self.filename}:{line_number}"
-                            )
+        if graph.start_zone is None:
+            raise MapError(
+                "Missing start zone in map",
+                f"{self.filename}:{line_number}"
+                )
 
-                    if graph.end_zone is None:
-                        raise MapError(
-                            "Missing end zone in map",
-                            f"{self.filename}:{line_number}"
-                            )
+        if graph.end_zone is None:
+            raise MapError(
+                "Missing end zone in map",
+                f"{self.filename}:{line_number}"
+                )
 
-                print(line_number, clean_line)
+        print(line_number, clean_line)
         return graph
