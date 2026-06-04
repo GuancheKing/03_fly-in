@@ -18,6 +18,7 @@ class Zone():
 
     def __init__(self, name: str, coords: tuple[int, int]):
         self.name = name
+        self.coords = coords
         self.zone_type = ZoneType.NORMAL
         self.max_drones = 1
         self.color = None
