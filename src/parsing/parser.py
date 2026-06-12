@@ -126,7 +126,7 @@ class MapParser():
                         )
 
                     # Extract origin and destination zone names.
-                    origin_name, destination_name = parts.split("-")
+                    origin_name, destination_name = parts
 
                     # Resolve zone names into actual Zone objects.
                     origin = graph.zones.get(origin_name)
@@ -180,6 +180,6 @@ class MapParser():
                 "Missing end zone in map",
                 f"{self.filename}:{line_number}"
                 )
-
+        print(graph.adjacency)
         print(line_number, clean_line)
         return graph
