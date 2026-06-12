@@ -3,7 +3,7 @@ from src.core.connection import Connection
 
 
 class Graph():
-    nb_drones: int
+    nb_drones: int | None
     zones: dict[str, Zone]
     connections: list[Connection]
     adjacency: dict[str, list[str]]
@@ -11,6 +11,7 @@ class Graph():
     end_zone: Zone | None
 
     def __init__(self):
+        self.nb_drones = None
         self.zones = {}
         self.connections = []
         self.adjacency = {}

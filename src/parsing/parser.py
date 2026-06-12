@@ -1,5 +1,5 @@
 from src.core.graph import Graph
-from src.core.zone import Zone
+from src.core.zone import Zone, ZoneType
 from src.core.connection import Connection
 
 
@@ -87,8 +87,48 @@ class MapParser():
                             f"{self.filename}:{line_number}"
                         )
 
-                    # Create the Zone object and register it in the graph.
+                    # Create the Zone object from the parsed hub definition.
                     zone = Zone(name, coords)
+
+                    # Extract optional metadata declared inside brackets.
+                    # Example:
+                    # [color=yellow max_drones=2 zone=restricted]
+                    metadata = self._parse_metadata(value)
+
+                    # Apply optional display attributes.
+                    if "color" in metadata:
+                        zone.color = metadata["color"]
+
+                    # Parse and validate zone capacity settings.
+                    # Metadata values are extracted as strings and
+                    # must be converted to their expected types.
+                    if "max_drones" in metadata:
+                        try:
+                            zone.max_drones = int(metadata["max_drones"])
+                            if zone.max_drones < 1:
+                                raise MapError(
+                                    "Max_drones in zone must be > 1",
+                                    f"{self.filename}:{line_number}"
+                                )
+                        except ValueError:
+                            raise MapError(
+                                "Invalid type for max_drones: "
+                                f"{metadata['max_drones']}",
+                                f"{self.filename}:{line_number}"
+                            )
+
+                    # Parse and validate the zone type.
+                    # Only values defined in ZoneType are accepted.
+                    if "zone" in metadata:
+                        try:
+                            zone.zone_type = ZoneType(metadata["zone"])
+                        except ValueError:
+                            raise MapError(
+                                f"Invalid zone type: {metadata['zone']}",
+                                f"{self.filename}:{line_number}"
+                            )
+
+                    # Register the zone in the graph
                     graph.zones[name] = zone
 
                     # Track special hubs used as simulation entry/exit points.
@@ -153,6 +193,26 @@ class MapParser():
                         destination
                     )
 
+                    metadata = self._parse_metadata(value)
+
+                    if "max_link_capacity" in metadata:
+                        try:
+                            connection.max_capacity = int(
+                                metadata["max_link_capacity"]
+                                )
+                            if connection.max_capacity < 1:
+                                raise MapError(
+                                    "Max_capacity in connection must be > 1",
+                                    f"{self.filename}:{line_number}"
+                                )
+
+                        except ValueError:
+                            raise MapError(
+                                "Invalid type for max_link_capacity: "
+                                f"{metadata['max_link_capacity']}",
+                                f"{self.filename}:{line_number}"
+                            )
+
                     # Register the connection in the graph.
                     graph.connections.append(connection)
 
@@ -192,18 +252,25 @@ class MapParser():
                 "Invalid value for nb_drones",
                 f"{self.filename}:{line_number}"
                 )
+        
+        # DEBUGGING printeos
+        # print(graph.nb_drones)
+        # print(graph.start_zone.name)
+        # print(graph.end_zone.name)
+        # print(len(graph.zones))
+        # print(len(graph.connections))
         # debug adjacency - print(graph.adjacency)
         # debug - print(line_number, clean_line)
         return graph
 
+    def _parse_metadata(self, value: str) -> dict[str, str]:
+        if "[" not in value:
+            return {}
+        raw_data = value.split("[")[1].split("]")[0]
+        data_list = raw_data.split(" ")
+        metadata = {}
+        for item in data_list:
+            key, value = item.split("=")
+            metadata[key] = value
+        return metadata
 
-def _parse_metadata(self, value: str) -> dict[str, str]:
-    if "[" not in value:
-        return {}
-    raw_data = value.split("[")[1].split("]")[0]
-    data_list = raw_data.split(" ")
-    metadata = {}
-    for item in data_list:
-        key, value = item.split("=")
-        metadata[key] = value
-    return metadata
