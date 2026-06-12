@@ -118,9 +118,9 @@ class MapParser():
                     # Validate connection format.
                     # A connection must link exactly two zones.
                     parts = basic_part.split("-")
-                    if not len(parts) == 2:
+                    if len(parts) != 2:
                         raise MapError(
-                            "Field Connection must be formated as 'connection:"
+                            "Field Connection must be formatted as 'connection:"
                             " zone1-zone2'",
                             f"{self.filename} : {line_number}"
                         )
@@ -180,6 +180,30 @@ class MapParser():
                 "Missing end zone in map",
                 f"{self.filename}:{line_number}"
                 )
-        print(graph.adjacency)
-        print(line_number, clean_line)
+
+        if graph.nb_drones is None:
+            raise MapError(
+                "Map must define nb_drones",
+                f"{self.filename}:{line_number}"
+                )
+
+        if graph.nb_drones < 1:
+            raise MapError(
+                "Invalid value for nb_drones",
+                f"{self.filename}:{line_number}"
+                )
+        # debug adjacency - print(graph.adjacency)
+        # debug - print(line_number, clean_line)
         return graph
+
+
+def _parse_metadata(self, value: str) -> dict[str, str]:
+    if "[" not in value:
+        return {}
+    raw_data = value.split("[")[1].split("]")[0]
+    data_list = raw_data.split(" ")
+    metadata = {}
+    for item in data_list:
+        key, value = item.split("=")
+        metadata[key] = value
+    return metadata
