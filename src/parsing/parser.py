@@ -1,5 +1,6 @@
 from src.core.graph import Graph
 from src.core.zone import Zone
+from src.core.connection import Connection
 
 
 class MapError(Exception):
@@ -106,6 +107,68 @@ class MapParser():
                             )
                         graph.end_zone = zone
 
+                # Parse connection definitions.
+                # Expected format:
+                # zone1-zone2 [optional metadata]
+                elif key.lower() == "connection":
+                    # Remove optional metadata and keep only:
+                    # zone1-zone2
+                    basic_part = value.split("[")[0].strip()
+
+                    # Validate connection format.
+                    # A connection must link exactly two zones.
+                    parts = basic_part.split("-")
+                    if not len(parts) == 2:
+                        raise MapError(
+                            "Field Connection must be formated as 'connection:"
+                            " zone1-zone2'",
+                            f"{self.filename} : {line_number}"
+                        )
+
+                    # Extract origin and destination zone names.
+                    origin_name, destination_name = parts.split("-")
+
+                    # Resolve zone names into actual Zone objects.
+                    origin = graph.zones.get(origin_name)
+                    destination = graph.zones.get(destination_name)
+
+                    # Connections reference existing zones.
+                    # Reject connections pointing to unknown zones.
+                    if origin is None:
+                        raise MapError(
+                            "Unknown zone referenced in connection:"
+                            f" {origin_name}",
+                            f"{self.filename}:{line_number}"
+                            )
+                    if destination is None:
+                        raise MapError(
+                            "Unknown zone referenced in connection:"
+                            f" {destination_name}",
+                            f"{self.filename}:{line_number}"
+                            )
+
+                    # Create the Connection object.
+                    connection = Connection(
+                        origin,
+                        destination
+                    )
+
+                    # Register the connection in the graph.
+                    graph.connections.append(connection)
+
+                    # Update graph adjacency information.
+                    # Connections are considered bidirectional.
+                    if origin_name not in graph.adjacency:
+                        graph.adjacency[origin_name] = []
+                    graph.adjacency[origin_name].append(destination_name)
+
+                    if destination_name not in graph.adjacency:
+                        graph.adjacency[destination_name] = []
+                    graph.adjacency[destination_name].append(origin_name)
+
+        # Validate graph-wide requirements.
+        # A valid map must contain exactly one start hub
+        # and exactly one end hub.
         if graph.start_zone is None:
             raise MapError(
                 "Missing start zone in map",
