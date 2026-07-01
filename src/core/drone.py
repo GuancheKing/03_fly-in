@@ -28,4 +28,3 @@ class Drone():
         self.status = DroneStatus.WAITING
         self.path = []
         self.current_step = 0
-

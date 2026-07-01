@@ -25,7 +25,7 @@ Graph
 - connections
 - adjacency list
 
-PathFinder
+PathFinder - calculates routes
 - receives Graph
 - finds possible routes
 - calculates route cost
@@ -37,14 +37,14 @@ TrafficManager
 - solves conflicts
 - decides who waits
 
-Simulation
+Simulation - decides movements
 - owns the main loop
 - current_turn
 - asks TrafficManager what happens
 - applies valid movements
 - stops when all drones arrive
 
-Renderer
+Renderer - shows results
 - prints mandatory output
 - optionally prints visual themed output
 
