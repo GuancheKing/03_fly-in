@@ -102,12 +102,12 @@ class MapParser():
                     # Parse and validate zone capacity settings.
                     # Metadata values are extracted as strings and
                     # must be converted to their expected types.
-                    if "max_drones" in metadata:
+                    if "max_drones" in metadata and key.lower() == "hub":
                         try:
                             zone.max_drones = int(metadata["max_drones"])
                             if zone.max_drones < 1:
                                 raise MapError(
-                                    "Max_drones in zone must be > 1",
+                                    "Max_drones in zone must greater than 0",
                                     f"{self.filename}:{line_number}"
                                 )
                         except ValueError:
@@ -138,6 +138,7 @@ class MapParser():
                                 f"Duplicated start zone: {name}",
                                 f"{self.filename}:{line_number}"
                             )
+                        zone.is_start_or_end = True
                         graph.start_zone = zone
                     elif key.lower() == "end_hub":
                         if graph.end_zone:
@@ -145,6 +146,7 @@ class MapParser():
                                 f"Duplicated end zone: {name}",
                                 f"{self.filename}:{line_number}"
                             )
+                        zone.is_start_or_end = True
                         graph.end_zone = zone
 
                 # Parse connection definitions.
@@ -202,7 +204,8 @@ class MapParser():
                                 )
                             if connection.max_capacity < 1:
                                 raise MapError(
-                                    "Max_capacity in connection must be > 1",
+                                    "Max_capacity in connection must"
+                                    " be greater than 0",
                                     f"{self.filename}:{line_number}"
                                 )
 
@@ -252,7 +255,7 @@ class MapParser():
                 "Invalid value for nb_drones",
                 f"{self.filename}:{line_number}"
                 )
-        
+
         # DEBUGGING printeos
         # print(graph.nb_drones)
         # print(graph.start_zone.name)
@@ -273,4 +276,3 @@ class MapParser():
             key, value = item.split("=")
             metadata[key] = value
         return metadata
-

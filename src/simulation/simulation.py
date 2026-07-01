@@ -16,5 +16,3 @@ class Simulation:
             id = f"D{drone}"
             starting_zone = self.graph.start_zone
             self.drones.append(Drone(id, starting_zone))
-            
-

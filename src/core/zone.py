@@ -15,6 +15,7 @@ class Zone():
     max_drones: int
     color: str | None
     current_occupancy: int
+    is_start_or_end: bool
 
     def __init__(self, name: str, coords: tuple[int, int]):
         self.name = name
@@ -23,8 +24,11 @@ class Zone():
         self.max_drones = 1
         self.color = None
         self.current_occupancy = 0
+        self.is_start_or_end = False
 
     def is_full(self) -> bool:
+        if self.is_start_or_end:
+            return False
         return self.max_drones <= self.current_occupancy
 
     def can_accept_drone(self) -> bool:
