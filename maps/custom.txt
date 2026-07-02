@@ -1,7 +1,0 @@
-nb_drones : 4
-
-start_hub: start 0 0 [color=green max_drones=8]
-hub: test 1 0 [zone=restricted color=orange]
-end_hub: goal 2 0 [color=red]
-connection: start-test [max_link_capacity=3]
-connection: test-goal

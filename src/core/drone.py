@@ -6,6 +6,7 @@ from src.core.connection import Connection
 class DroneStatus(str, Enum):
     WAITING = "waiting"
     MOVING = "moving"
+    IN_TRANSIT = "in_transit"
     DELIVERED = "delivered"
 
 
@@ -16,6 +17,8 @@ class Drone():
     status: DroneStatus
     path: list[Zone]
     current_step: int
+    remaining_turns: int
+    destination_zone: Zone | None
 
     def __init__(
             self,
@@ -28,3 +31,5 @@ class Drone():
         self.status = DroneStatus.WAITING
         self.path = []
         self.current_step = 0
+        self.remaining_turns = 0
+        self.destination_zone = None

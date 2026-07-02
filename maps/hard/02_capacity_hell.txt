@@ -1,7 +1,7 @@
 # Hard Level 2: Extreme capacity constraints with timing challenges
 nb_drones: 12
 
-start_hub: start 0 -1 [color=green max_drones=12]
+start_hub: start 0 -1 [color=green]
 hub: gate1 1 0 [color=orange max_drones=1]
 hub: gate2 2 0 [color=orange max_drones=1]
 hub: gate3 3 0 [color=orange max_drones=1]
@@ -15,7 +15,7 @@ hub: priority_bypass1 3 2 [zone=priority color=cyan max_drones=3]
 hub: priority_bypass2 4 2 [zone=priority color=cyan max_drones=3]
 hub: convergence 7 0 [color=yellow max_drones=6]
 hub: final_bottleneck 8 0 [color=orange max_drones=3]
-end_hub: goal 9 0 [color=green max_drones=12]
+end_hub: goal 9 0 [color=green]
 
 # Sequential gates (major bottleneck)
 connection: start-gate1 [max_link_capacity=1]

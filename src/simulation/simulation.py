@@ -1,6 +1,7 @@
 from src.core.graph import Graph
 from src.core.drone import Drone, DroneStatus
-from src.core.zone import Zone
+from src.core.zone import Zone, ZoneType
+from src.core.connection import Connection
 from src.pathfinding.pathfiner import PathFinder
 
 
@@ -55,17 +56,26 @@ class Simulation:
 
     def run_turn(self):
         # Process one simulation turn.
+
         for drone in self.drones:
             # Skip drones that have already been delivered.
             if drone.current_zone is self.graph.end_zone:
                 drone.status = DroneStatus.DELIVERED
                 continue
+
+            if drone.status == DroneStatus.IN_TRANSIT:
+                self._process_transit(drone)
+                continue
             # Get the next zone in the planned path.
             next_zone = drone.path[drone.current_step + 1]
 
             if next_zone.can_accept_drone():
-                self._apply_move(drone, next_zone)
-                drone.status = DroneStatus.MOVING
+
+                if next_zone.zone_type == ZoneType.RESTRICTED:
+                    self._start_transit(drone, next_zone)
+                else:
+                    self._apply_move(drone, next_zone)
+                    drone.status = DroneStatus.MOVING
             # Wait until the destination becomes available.
             else:
                 drone.status = DroneStatus.WAITING
@@ -97,6 +107,34 @@ class Simulation:
         print("====================")
         print(f"Total turns : {self.turn}")
         print(f"Drones      : {len(self.drones)}")
+
+    def _start_transit(self, drone: Drone, destination: Zone):
+        origin = drone.current_zone
+
+        if origin is not None and not origin.is_start_or_end:
+            origin.current_occupancy -= 1
+
+        drone.current_zone = None
+        drone.destination_zone = destination
+        drone.remaining_turns = 1
+        drone.status = DroneStatus.IN_TRANSIT
+
+    def _process_transit(self, drone: Drone):
+        drone.remaining_turns -= 1
+
+        if drone.remaining_turns > 0:
+            return
+
+        if drone.destination_zone is not None:
+            self._apply_move(drone, drone.destination_zone)
+
+            drone.destination_zone = None
+
+            drone.remaining_turns = 0
+
+            drone.status = DroneStatus.MOVING
+
+    def _find_connection(self, origin: Zone, destination: Zone) -> Connection:
 
     def run(self):
         # Run the simulation until all drones are delivered.

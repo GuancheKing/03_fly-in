@@ -1,7 +1,7 @@
 # Hard Level 1: Complex maze with multiple dead ends and loops
 nb_drones: 8
 
-start_hub: start 0 0 [color=green max_drones=8]
+start_hub: start 0 0 [color=green]
 hub: maze_a1 1 0 [color=blue max_drones=2]
 hub: maze_a2 2 0 [color=blue]
 hub: maze_b1 1 1 [color=blue]
@@ -17,7 +17,7 @@ hub: bottleneck 5 1 [color=yellow max_drones=2]
 hub: final_stretch1 6 0 [zone=priority color=cyan]
 hub: final_stretch2 6 1 [zone=priority color=cyan]
 hub: final_stretch3 6 2 [zone=priority color=cyan]
-end_hub: goal 7 1 [color=green max_drones=8]
+end_hub: goal 7 1 [color=green]
 
 # Main path connections
 connection: start-maze_a1 [max_link_capacity=2]
