@@ -7,9 +7,8 @@ def main() -> None:
 
     graph = parser.parse()
 
-    simulation = Simulation(graph)
-    simulation.run_turn()
-    simulation.run_turn()
+    simulation = Simulation(graph, debug=True)
+    simulation.run()
 
 
 if __name__ == "__main__":

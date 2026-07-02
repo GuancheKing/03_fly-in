@@ -5,10 +5,12 @@ from src.pathfinding.pathfiner import PathFinder
 
 
 class Simulation:
-    def __init__(self, graph: Graph):
+
+    def __init__(self, graph: Graph, debug: bool = False):
         self.graph = graph
         self.pathfinder = PathFinder(self.graph)
         self.turn = 0
+        self.debug = debug
         self.drones = []
         self._create_drones()
         self._prepare_paths()
@@ -52,20 +54,56 @@ class Simulation:
         drone.current_step += 1
 
     def run_turn(self):
+        # Process one simulation turn.
         for drone in self.drones:
+            # Skip drones that have already been delivered.
             if drone.current_zone is self.graph.end_zone:
                 drone.status = DroneStatus.DELIVERED
                 continue
+            # Get the next zone in the planned path.
             next_zone = drone.path[drone.current_step + 1]
 
             if next_zone.can_accept_drone():
                 self._apply_move(drone, next_zone)
                 drone.status = DroneStatus.MOVING
+            # Wait until the destination becomes available.
             else:
                 drone.status = DroneStatus.WAITING
 
-        print(
-            f"Turn {self.turn}:",
-            [f"{drone.id}-{drone.current_zone.name}" for drone in self.drones]
-            )
         self.turn += 1
+
+    def _all_drones_at_goal(self):
+        # Check whether all drones have reached the destination.
+        for drone in self.drones:
+            if drone.current_zone is not self.graph.end_zone:
+                return False
+        return True
+
+    def _print_turn(self):
+        # Collect all drone movements for the current turn.
+        turn_output = []
+
+        for drone in self.drones:
+            if drone.status == DroneStatus.MOVING:
+                drone_output = f"{drone.id}-{drone.current_zone.name}"
+                turn_output.append(drone_output)
+        if turn_output:
+            # Print the turn only if at least one drone moved.
+            print(" ".join(turn_output))
+
+    def _print_statistics(self):
+        print("\n====================")
+        print("Simulation finished")
+        print("====================")
+        print(f"Total turns : {self.turn}")
+        print(f"Drones      : {len(self.drones)}")
+
+    def run(self):
+        # Run the simulation until all drones are delivered.
+        while not self._all_drones_at_goal():
+            self.run_turn()
+            self._print_turn()
+
+        # Show additional statistics in debug mode.
+        if self.debug:
+            self._print_statistics()
