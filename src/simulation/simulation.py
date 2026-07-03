@@ -5,6 +5,11 @@ from src.core.connection import Connection
 from src.pathfinding.pathfiner import PathFinder
 
 
+class SimulationError(Exception):
+    def __init__(self, msg: str):
+        super().__init__(f"Error in the Simulation: {msg}")
+
+
 class Simulation:
 
     def __init__(self, graph: Graph, debug: bool = False):
@@ -94,8 +99,21 @@ class Simulation:
         turn_output = []
 
         for drone in self.drones:
-            if drone.status == DroneStatus.MOVING:
+            if (
+                drone.status == DroneStatus.MOVING and
+                drone.current_zone is not None
+            ):
                 drone_output = f"{drone.id}-{drone.current_zone.name}"
+                turn_output.append(drone_output)
+            elif (
+                drone.status == DroneStatus.IN_TRANSIT and
+                drone.current_connection is not None
+            ):
+                drone_output = (
+                    f"{drone.id}-"
+                    f"{drone.current_connection.origin.name}-"
+                    f"{drone.current_connection.destination.name}"
+                    )
                 turn_output.append(drone_output)
         if turn_output:
             # Print the turn only if at least one drone moved.
@@ -110,9 +128,17 @@ class Simulation:
 
     def _start_transit(self, drone: Drone, destination: Zone):
         origin = drone.current_zone
+        if origin is None:
+            raise SimulationError("Drone has no origin zone")
 
-        if origin is not None and not origin.is_start_or_end:
+        connection = self._find_connection(origin, destination)
+        drone.current_connection = connection
+
+        if not origin.is_start_or_end:
             origin.current_occupancy -= 1
+
+        if not destination.is_start_or_end:
+            destination.current_occupancy += 1
 
         drone.current_zone = None
         drone.destination_zone = destination
@@ -126,15 +152,33 @@ class Simulation:
             return
 
         if drone.destination_zone is not None:
-            self._apply_move(drone, drone.destination_zone)
+            self._complete_transit(drone, drone.destination_zone)
 
+            # Clear transit data
             drone.destination_zone = None
-
+            drone.current_connection = None
             drone.remaining_turns = 0
 
             drone.status = DroneStatus.MOVING
 
+    def _complete_transit(self, drone: Drone, destination: Zone):
+        drone.current_zone = destination
+        drone.current_step += 1
+
     def _find_connection(self, origin: Zone, destination: Zone) -> Connection:
+        for connection in self.graph.connections:
+            if (
+                connection.origin is origin
+                and connection.destination is destination
+            ) or (
+                connection.origin is destination
+                and connection.destination is origin
+            ):
+                return connection
+        raise SimulationError(
+                f"Couldn't find connection between {origin.name}"
+                f" and {destination.name}"
+            )
 
     def run(self):
         # Run the simulation until all drones are delivered.
