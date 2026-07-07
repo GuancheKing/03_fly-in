@@ -74,17 +74,28 @@ class Simulation:
             # Get the next zone in the planned path.
             next_zone = drone.path[drone.current_step + 1]
 
-            if next_zone.can_accept_drone():
+            if drone.current_zone is None:
+                raise SimulationError("Drone has no current zone")
 
-                if next_zone.zone_type == ZoneType.RESTRICTED:
-                    self._start_transit(drone, next_zone)
-                else:
-                    self._apply_move(drone, next_zone)
-                    drone.status = DroneStatus.MOVING
-            # Wait until the destination becomes available.
-            else:
+            connection = self._find_connection(drone.current_zone, next_zone)
+
+            if not next_zone.can_accept_drone():
                 drone.status = DroneStatus.WAITING
+                continue
 
+            if not connection.can_accept_drone():
+                drone.status = DroneStatus.WAITING
+                continue
+
+            connection.occupy()
+
+            if next_zone.zone_type == ZoneType.RESTRICTED:
+                self._start_transit(drone, next_zone)
+            else:
+                self._apply_move(drone, next_zone)
+                drone.status = DroneStatus.MOVING
+
+        self._reset_connection_usage()
         self.turn += 1
 
     def _all_drones_at_goal(self):
@@ -179,6 +190,10 @@ class Simulation:
                 f"Couldn't find connection between {origin.name}"
                 f" and {destination.name}"
             )
+
+    def _reset_connection_usage(self):
+        for connection in self.graph.connections:
+            connection.reset_usage()
 
     def run(self):
         # Run the simulation until all drones are delivered.
