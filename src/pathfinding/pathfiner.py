@@ -19,12 +19,10 @@ class PathFinder:
         start_name = self.graph.start_zone.name
         goal_name = self.graph.end_zone.name
 
-        # Stores the minimum known cost to reach each zone.
+        # Reset pathfinding state.
         self.costs = {
             start_name: 0
         }
-        # Stores the previous zone used to reach each zone.
-        # This is later used to rebuild the final path.
         self.previous_nodes = {}
 
         # Zones waiting to be explored.
@@ -64,34 +62,6 @@ class PathFinder:
 
         # A path exists if the goal was reached.
         return goal_name in self.costs
-
-    # def path_exists_BFS(self) -> bool:
-    #     start_name = self.graph.start_zone.name
-    #     goal_name = self.graph.end_zone.name
-
-    #     # Track already visited nodes to avoid infinite loops.
-    #     visited = {start_name}
-
-    #     # Queue of nodes waiting to be explored.
-    #     # BFS uses FIFO order.
-    #     queue = [start_name]
-
-    #     while queue:
-    #         current = queue.pop(0)
-
-    #         # Stop as soon as the destination is found.
-    #         if current == goal_name:
-    #             return True
-
-    #         # Explore all unvisited neighbors of the current node.
-    #         for neighbor in self.graph.adjacency.get(current, []):
-    #             if neighbor not in visited:
-    #                 visited.add(neighbor)
-
-    #                 # Remember where this neighbor was reached from.
-    #                 self.previous_nodes[neighbor] = current
-    #                 queue.append(neighbor)
-    #         return False
 
     def find_path(self) -> list[str]:
         if not self.previous_nodes:

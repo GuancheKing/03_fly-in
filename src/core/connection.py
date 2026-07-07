@@ -16,3 +16,15 @@ class Connection():
         self.destination = destination
         self.max_capacity = 1
         self.current_usage = 0
+
+    def can_accept_drone(self) -> bool:
+        return not self.is_full()
+
+    def is_full(self) -> bool:
+        return self.current_usage >= self.max_capacity
+
+    def occupy(self) -> None:
+        self.current_usage += 1
+
+    def reset_usage(self) -> None:
+        self.current_usage = 0
