@@ -37,11 +37,9 @@ class Zone():
         return True
 
     def movement_cost(self) -> int:
-        if (
-            self.zone_type == ZoneType.NORMAL or
-            self.zone_type == ZoneType.PRIORITY
-        ):
+        if self.zone_type in (ZoneType.NORMAL, ZoneType.PRIORITY):
             return 1
+
         elif self.zone_type == ZoneType.RESTRICTED:
             return 2
 
