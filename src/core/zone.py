@@ -35,3 +35,14 @@ class Zone():
         if self.zone_type == ZoneType.BLOCKED or self.is_full():
             return False
         return True
+
+    def movement_cost(self) -> int:
+        if (
+            self.zone_type == ZoneType.NORMAL or
+            self.zone_type == ZoneType.PRIORITY
+        ):
+            return 1
+        elif self.zone_type == ZoneType.RESTRICTED:
+            return 2
+
+        raise ValueError("Blocked zones have no movement cost.")
