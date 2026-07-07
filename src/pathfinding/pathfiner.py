@@ -12,10 +12,13 @@ class PathFinder:
         self.graph = graph
         # Stores the previous node used to reach each visited node.
         # This is later used to rebuild the final path.
-        self.previous_nodes = {}
-        self.costs = {}
+        self.previous_nodes: dict[str, str] = {}
+        self.costs: dict[str, int] = {}
 
     def path_exists(self) -> bool:
+        if self.graph.start_zone is None or self.graph.end_zone is None:
+            raise PathError("Missing start or end zone", "PathFinder")
+
         start_name = self.graph.start_zone.name
         goal_name = self.graph.end_zone.name
 
@@ -69,6 +72,9 @@ class PathFinder:
                 "Path has not been calculated yet",
                 "PathFinder"
             )
+        if self.graph.start_zone is None or self.graph.end_zone is None:
+            raise PathError("Missing start or end zone", "PathFinder")
+
         start_name = self.graph.start_zone.name
         goal_name = self.graph.end_zone.name
 

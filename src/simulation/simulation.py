@@ -17,7 +17,7 @@ class Simulation:
         self.pathfinder = PathFinder(self.graph)
         self.turn = 0
         self.debug = debug
-        self.drones = []
+        self.drones: list[Drone] = []
         self._create_drones()
         self._prepare_paths()
 
