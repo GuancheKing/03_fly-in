@@ -1,6 +1,7 @@
 import sys
-from src.parsing.parser import MapParser
-from src.simulation.simulation import Simulation
+from src.parsing.parser import MapParser, MapError
+from src.simulation.simulation import Simulation, SimulationError
+from src.pathfinding.pathfiner import PathError
 
 
 def main() -> None:
@@ -10,10 +11,16 @@ def main() -> None:
 
     filename = sys.argv[1]
 
-    graph = MapParser(filename).parse()
-
-    simulation = Simulation(graph, debug=True)
-    simulation.run()
+    try:
+        graph = MapParser(filename).parse()
+        simulation = Simulation(graph, debug=False)
+        simulation.run()
+    except (MapError, PathError, SimulationError) as error:
+        print(error)
+        return
+    except FileNotFoundError:
+        print(f"File not found: {filename}")
+        return
 
 
 if __name__ == "__main__":

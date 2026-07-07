@@ -1,0 +1,8 @@
+nb_drones: 1
+
+start_hub: start 0 0
+hub: test 1 0 [zone=banana]
+end_hub: goal 2 0
+
+connection: start-test
+connection: test-goal

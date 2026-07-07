@@ -30,7 +30,7 @@ class Simulation:
 
     def _prepare_paths(self):
         if not self.pathfinder.path_exists():
-            raise RuntimeError("No path found")
+            raise SimulationError("No path found")
 
         for drone in self.drones:
             # Assign an initial path to every drone.

@@ -107,7 +107,8 @@ class MapParser():
                             zone.max_drones = int(metadata["max_drones"])
                             if zone.max_drones < 1:
                                 raise MapError(
-                                    "Max_drones in zone must greater than 0",
+                                    "Max_drones in zone must be greater"
+                                    " than 0",
                                     f"{self.filename}:{line_number}"
                                 )
                         except ValueError:
@@ -162,8 +163,8 @@ class MapParser():
                     parts = basic_part.split("-")
                     if len(parts) != 2:
                         raise MapError(
-                            "Field Connection must be formatted as 'connection:"
-                            " zone1-zone2'",
+                            "Field Connection must be formatted as"
+                            " 'connection: zone1-zone2'",
                             f"{self.filename} : {line_number}"
                         )
 
@@ -187,6 +188,19 @@ class MapParser():
                             "Unknown zone referenced in connection:"
                             f" {destination_name}",
                             f"{self.filename}:{line_number}"
+                            )
+                    for existing_connection in graph.connections:
+                        if (
+                            existing_connection.origin is origin
+                            and existing_connection.destination is destination
+                        ) or (
+                            existing_connection.origin is destination
+                            and existing_connection.destination is origin
+                        ):
+                            raise MapError(
+                                f"Duplicated connection: {origin_name}"
+                                f"-{destination_name}",
+                                f"{self.filename}:{line_number}"
                             )
 
                     # Create the Connection object.
