@@ -3,6 +3,7 @@ from src.core.drone import Drone, DroneStatus
 from src.core.zone import Zone, ZoneType
 from src.core.connection import Connection
 from src.pathfinding.pathfiner import PathFinder
+from src.visualization.terminal_visualizer import TerminalVisualizer
 
 
 class SimulationError(Exception):
@@ -22,10 +23,11 @@ class Simulation:
         self.pathfinder = PathFinder(self.graph)
         self.turn = 0
         self.debug = debug
+        self.visual = visual
+        self.visualizer = TerminalVisualizer() if visual else None
         self.drones: list[Drone] = []
         self._create_drones()
         self._prepare_paths()
-        self.visual = visual
 
     def _create_drones(self):
         # Create all drones at the start zone.
@@ -207,23 +209,10 @@ class Simulation:
             self.run_turn()
             self._print_turn()
 
-            if self.visual:
-                self._print_visual_turn()
+            if self.visualizer:
+                self.visualizer.print_turn(self.turn, self.graph, self.drones)
                 print()
 
         # Show additional statistics in debug mode.
         if self.debug:
             self._print_statistics()
-
-    def _print_visual_turn(self) -> None:
-        print(f"\n[Turn {self.turn}]")
-
-        for zone_name, zone in self.graph.zones.items():
-            drones_here = []
-
-            for drone in self.drones:
-                if drone.current_zone is zone:
-                    drones_here.append(drone.id)
-
-            drones_text = " ".join(drones_here) if drones_here else "-"
-            print(f"{zone_name}: {drones_text}")
