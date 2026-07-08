@@ -1,15 +1,23 @@
 from src.core.graph import Graph
 from src.core.drone import Drone
+from src.core.zone import Zone, ZoneType
 
 
 class TerminalVisualizer:
+    ZONE_SYMBOLS = {
+            ZoneType.NORMAL: "⚪",
+            ZoneType.BLOCKED: "⛔",
+            ZoneType.RESTRICTED: "🚧",
+            ZoneType.PRIORITY: "⭐",
+        }
+
     def print_turn(
         self,
         turn: int,
         graph: Graph,
         drones: list[Drone]
     ) -> None:
-        print(self._rainbow_text(f"\n[Turn {turn}]"))
+        print(f"\n[Turn {turn}]")
         self._print_zones(graph, drones)
         self._print_connections(graph)
 
@@ -29,35 +37,41 @@ class TerminalVisualizer:
                 occupancy_text = "∞"
             else:
                 occupancy_text = (
-                    f"{zone.current_occupancy}/{str(zone.max_drones)}"
+                    f"({zone.current_occupancy}/{str(zone.max_drones)})"
                     )
 
             drones_text = " ".join(drones_here) if drones_here else "-"
-            zone_label = self._color_text(zone_name, zone.color)
+            symbol = self._zone_symbol(graph, zone)
+
+            zone_text = f"{symbol} {zone_name:<15}"
+            zone_label = self._color_text(zone_text, zone.color)
 
             print(f"{zone_label} "
-                  f"({occupancy_text})"
+                  f"{occupancy_text:<5}"
                   f": {drones_text}")
 
     def _print_connections(self, graph: Graph) -> None:
-        print(self._rainbow_text("\nConnections:"))
+        active_connections = []
 
         for connection in graph.connections:
-            name = (
-                self._color_text(
-                    connection.origin.name,
-                    connection.origin.color
-                    )
-                + "-"
-                + self._color_text(
-                    connection.destination.name,
-                    connection.destination.color
-                    ))
+            if connection.current_usage > 0:
+                active_connections.append(connection)
+
+        if not active_connections:
+            return
+
+        print(self._rainbow_text("\nActive connections:"))
+
+        for connection in active_connections:
+            name = ((connection.origin.name)
+                    + " - "
+                    + (connection.destination.name))
             usage = (
                 f"{connection.current_usage}/"
                 f"{connection.max_capacity}"
             )
-            print(f"{name} ({usage})")
+            connection_text = f"🔗 {name}"
+            print(f"{connection_text:<25} ({usage})")
 
     def _color_text(self, text: str, color: str | None) -> str:
         colors = {
@@ -89,3 +103,10 @@ class TerminalVisualizer:
             color = index % len(colors_list)
             new_text.append(self._color_text(letter, colors_list[color]))
         return "".join(new_text)
+
+    def _zone_symbol(self, graph: Graph, zone: Zone) -> str:
+        if zone is graph.start_zone:
+            return "🚀"
+        if zone is graph.end_zone:
+            return "🏁"
+        return self.ZONE_SYMBOLS.get(zone.zone_type, "❓")

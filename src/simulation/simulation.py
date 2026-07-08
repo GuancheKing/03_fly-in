@@ -23,7 +23,6 @@ class Simulation:
         self.pathfinder = PathFinder(self.graph)
         self.turn = 0
         self.debug = debug
-        self.visual = visual
         self.visualizer = TerminalVisualizer() if visual else None
         self.drones: list[Drone] = []
         self._create_drones()
@@ -103,7 +102,6 @@ class Simulation:
                 self._apply_move(drone, next_zone)
                 drone.status = DroneStatus.MOVING
 
-        self._reset_connection_usage()
         self.turn += 1
 
     def _all_drones_at_goal(self):
@@ -212,6 +210,8 @@ class Simulation:
             if self.visualizer:
                 self.visualizer.print_turn(self.turn, self.graph, self.drones)
                 print()
+
+            self._reset_connection_usage()
 
         # Show additional statistics in debug mode.
         if self.debug:
