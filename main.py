@@ -13,7 +13,7 @@ def main() -> None:
 
     try:
         graph = MapParser(filename).parse()
-        simulation = Simulation(graph, debug=False, visual=True)
+        simulation = Simulation(graph, debug=True, visual=True)
         simulation.run()
     except (MapError, PathError, SimulationError) as error:
         print(error)
