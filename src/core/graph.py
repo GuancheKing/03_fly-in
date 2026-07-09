@@ -10,7 +10,7 @@ class Graph():
     start_zone: Zone | None
     end_zone: Zone | None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.nb_drones = None
         self.zones = {}
         self.connections = []

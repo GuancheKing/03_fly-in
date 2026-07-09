@@ -28,14 +28,20 @@ class Simulation:
         self._create_drones()
         self._prepare_paths()
 
-    def _create_drones(self):
+    def _create_drones(self) -> None:
         # Create all drones at the start zone.
+        if self.graph.nb_drones is None:
+            raise SimulationError("Number of drones is not defined")
+
+        if self.graph.start_zone is None:
+            raise SimulationError("Start zone is not defined")
+
         for drone in range(1, self.graph.nb_drones + 1):
             id = f"D{drone}"
             starting_zone = self.graph.start_zone
             self.drones.append(Drone(id, starting_zone))
 
-    def _prepare_paths(self):
+    def _prepare_paths(self) -> None:
         if not self.pathfinder.path_exists():
             raise SimulationError("No path found")
 
@@ -48,7 +54,7 @@ class Simulation:
                 drone.path.append(self.graph.zones[zone])
             # print(drone.id, [zone.name for zone in drone.path])
 
-    def _apply_move(self, drone: Drone, destination: Zone):
+    def _apply_move(self, drone: Drone, destination: Zone) -> None:
         # Store the current zone before moving.
         origin = drone.current_zone
 
@@ -66,7 +72,7 @@ class Simulation:
         drone.current_zone = destination
         drone.current_step += 1
 
-    def run_turn(self):
+    def run_turn(self) -> None:
         # Process one simulation turn.
 
         for drone in self.drones:
@@ -104,14 +110,14 @@ class Simulation:
 
         self.turn += 1
 
-    def _all_drones_at_goal(self):
+    def _all_drones_at_goal(self) -> bool:
         # Check whether all drones have reached the destination.
         for drone in self.drones:
             if drone.current_zone is not self.graph.end_zone:
                 return False
         return True
 
-    def _print_turn(self):
+    def _print_turn(self) -> None:
         # Collect all drone movements for the current turn.
         turn_output = []
 
@@ -136,14 +142,14 @@ class Simulation:
             # Print the turn only if at least one drone moved.
             print(" ".join(turn_output))
 
-    def _print_statistics(self):
+    def _print_statistics(self) -> None:
         print("\n====================")
         print("Simulation finished")
         print("====================")
         print(f"Total turns : {self.turn}")
         print(f"Drones      : {len(self.drones)}")
 
-    def _start_transit(self, drone: Drone, destination: Zone):
+    def _start_transit(self, drone: Drone, destination: Zone) -> None:
         origin = drone.current_zone
         if origin is None:
             raise SimulationError("Drone has no origin zone")
@@ -162,7 +168,7 @@ class Simulation:
         drone.remaining_turns = 1
         drone.status = DroneStatus.IN_TRANSIT
 
-    def _process_transit(self, drone: Drone):
+    def _process_transit(self, drone: Drone) -> None:
         drone.remaining_turns -= 1
 
         if drone.remaining_turns > 0:
@@ -178,7 +184,7 @@ class Simulation:
 
             drone.status = DroneStatus.MOVING
 
-    def _complete_transit(self, drone: Drone, destination: Zone):
+    def _complete_transit(self, drone: Drone, destination: Zone) -> None:
         drone.current_zone = destination
         drone.current_step += 1
 
@@ -197,11 +203,11 @@ class Simulation:
                 f" and {destination.name}"
             )
 
-    def _reset_connection_usage(self):
+    def _reset_connection_usage(self) -> None:
         for connection in self.graph.connections:
             connection.reset_usage()
 
-    def run(self):
+    def run(self) -> None:
         # Run the simulation until all drones are delivered.
         while not self._all_drones_at_goal():
             self.run_turn()
