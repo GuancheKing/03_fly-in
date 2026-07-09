@@ -67,7 +67,7 @@ lint: install
 
 lint-strict: install
 	$(PY) -m flake8 . --exclude=$(VENV)
-	$(PY) -m mypy . --strict --exclude $(VENV)
+	$(PY) -m mypy . --strict $(MYPY_FLAGS) --exclude $(VENV)
 
 #Cleaning
 #--------
