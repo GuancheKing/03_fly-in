@@ -34,7 +34,7 @@ debug: install check-map
 	$(PY) -m pdb $(MAIN) "$(MAP)"
 
 visual: install check-map
-	$(PY) $(MAIN) "$(MAP)" --visual
+	$(PY) $(MAIN) --visual "$(MAP)"
 
 #Environment and dependencies
 #----------------------------
@@ -67,7 +67,7 @@ lint: install
 
 lint-strict: install
 	$(PY) -m flake8 . --exclude=$(VENV)
-	$(PY) -m mypy . --strict $(MYPY_FLAGS) --exclude $(VENV)
+	$(PY) -m mypy . --strict --exclude $(VENV)
 
 #Cleaning
 #--------
@@ -76,18 +76,21 @@ clean:
 	rm -rf .mypy_cache
 	rm -rf .pytest_cache
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
 
 re: clean install
 
 #Help
 #----
 help:
-	@echo "make install      -> Create venv and install dependencies"
-	@echo "make run          -> Run program"
-	@echo "make visual       -> Run program with visual mode"
-	@echo "make debug        -> Run program with debug mode"
-	@echo "make lint         -> Run flake8 and mypy"
-	@echo "make lint-strict  -> Run strict mypy"
-	@echo "make clean        -> Remove venv and cache files"
+	@echo "make install                     -> Create venv and install dependencies"
+	@echo "make run MAP=<path>              -> Run program with a map"
+	@echo "make visual MAP=<path>           -> Run program in visual mode"
+	@echo "make debug MAP=<path>            -> Run program with pdb"
+	@echo "make lint                        -> Run flake8 and mypy"
+	@echo "make lint-strict                 -> Run flake8 and strict mypy"
+	@echo "make clean                       -> Remove venv and cache files"
+	@echo "make re                          -> Clean and reinstall dependencies"
 
-.PHONY: all install run debug visual lint lint-strict clean re help
+.PHONY: all install run debug visual check-map \
+		lint lint-strict clean re help
