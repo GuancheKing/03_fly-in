@@ -2,7 +2,7 @@ from src.core.graph import Graph
 from src.core.drone import Drone, DroneStatus
 from src.core.zone import Zone, ZoneType
 from src.core.connection import Connection
-from src.pathfinding.pathfiner import PathFinder
+from src.pathfinding.pathfinder import PathFinder
 from src.visualization.terminal_visualizer import TerminalVisualizer
 
 

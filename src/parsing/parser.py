@@ -30,7 +30,7 @@ class MapParser():
 
         with open(self.filename, "r") as file:
             for line_number, line in enumerate(file, start=1):
-                clean_line = line.strip()
+                clean_line = line.split("#", 1)[0].strip()
 
                 if not clean_line:
                     continue
@@ -38,7 +38,14 @@ class MapParser():
                 if clean_line.startswith("#"):
                     continue
 
-                key, value = clean_line.split(":")
+                try:
+                    key, value = clean_line.split(":", 1)
+                except ValueError:
+                    raise MapError(
+                        "Each declaration must contain ':'",
+                        f"{self.filename}:{line_number}"
+                    )
+
                 key = key.strip()
                 value = value.strip()
 

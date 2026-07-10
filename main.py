@@ -1,7 +1,7 @@
 import argparse
 from src.parsing.parser import MapParser, MapError
 from src.simulation.simulation import Simulation, SimulationError
-from src.pathfinding.pathfiner import PathError
+from src.pathfinding.pathfinder import PathError
 
 
 def parse_args() -> argparse.Namespace:

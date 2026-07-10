@@ -14,6 +14,7 @@ class PathFinder:
         # This is later used to rebuild the final path.
         self.previous_nodes: dict[str, str] = {}
         self.costs: dict[str, int] = {}
+        self.path_priorities: dict[str, int] = {}
 
     def path_exists(self) -> bool:
         if self.graph.start_zone is None or self.graph.end_zone is None:
@@ -26,21 +27,41 @@ class PathFinder:
         self.costs = {
             start_name: 0
         }
+        self.path_priorities = {
+            start_name: 0
+        }
         self.previous_nodes = {}
 
-        # Zones waiting to be explored.
-        # Each entry stores (current_cost, zone_name).
+        # Priority queue of zones waiting to be explored.
+        # Each entry stores:
+        # (total_cost, -priority_score, zone_name)
+        #
+        # The negative priority score allows Python's default tuple sorting
+        # to prefer paths that traverse more priority zones
+        # when costs are same.
         pending = [
-            (0, start_name)
+            (0, 0, start_name)
         ]
         while pending:
-            # Always process the zone with the lowest known cost.
+            # Process the best candidate first.
+            # Paths are ordered by:
+            #   1. Lowest total movement cost.
+            #   2. Highest accumulated priority score.
             pending.sort()
-            current_cost, current = pending.pop(0)
+            current_cost, negative_priority, current = pending.pop(0)
+            # Convert the stored negative score back into
+            # the accumulated priority score.
+            current_priority = -negative_priority
 
             # Ignore outdated entries if a better path
             # to this zone has already been found.
-            if current_cost > self.costs[current]:
+            if (
+                current_cost > self.costs[current]
+                or (
+                    current_cost == self.costs[current]
+                    and current_priority < self.path_priorities[current]
+                    )
+            ):
                 continue
 
             # Explore every reachable neighbor.
@@ -52,16 +73,35 @@ class PathFinder:
                 # Calculate the total cost to reach the neighbor.
                 neighbor_cost = neighbor_zone.movement_cost()
                 new_cost = current_cost + neighbor_cost
+                # Visiting a priority zone does not reduce the movement cost,
+                # but increases the priority score used to break ties
+                # between paths with the same total cost.
+                priority_bonus = (
+                    1 if neighbor_zone.zone_type == ZoneType.PRIORITY else 0
+                )
+                new_priority = current_priority + priority_bonus
 
-                # Update the path if this route is cheaper
-                # than any previously known route.
+                # Update the best known route if:
+                # - the zone has not been visited yet,
+                # - the new path has a lower total cost,
+                # - or both paths have the same cost but the new one
+                #   traverses more priority zones.
                 if (
                     neighbor not in self.costs
                     or new_cost < self.costs[neighbor]
+                    or (
+                        new_cost == self.costs[neighbor]
+                        and new_priority > self.path_priorities[neighbor]
+                    )
                 ):
                     self.costs[neighbor] = new_cost
                     self.previous_nodes[neighbor] = current
-                    pending.append((new_cost, neighbor))
+                    self.path_priorities[neighbor] = new_priority
+
+                    # Store the updated candidate.
+                    # The negative priority score ensures that paths with more
+                    # priority zones are explored first when costs are equal.
+                    pending.append((new_cost, -new_priority, neighbor))
 
         # A path exists if the goal was reached.
         return goal_name in self.costs
